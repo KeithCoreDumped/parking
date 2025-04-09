@@ -5,25 +5,20 @@ class ParkInfoScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = {
-      'name': '智慧停车场A区',
-      'address': 'XX路123号',
-      'total_spaces': 200,
-      'available_spaces': 48,
-      'price_per_hour': 5
-    };
-
     return Scaffold(
-      appBar: AppBar(title: const Text('停车场信息')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text('名称: ${data['name']}'),
-          Text('地址: ${data['address']}'),
-          Text('总车位: ${data['total_spaces']}'),
-          Text('剩余车位: ${data['available_spaces']}'),
-          Text('停车费: ${data['price_per_hour']}元/小时'),
-        ],
+      appBar: AppBar(title: const Text('🅿️ 停车场信息')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ListTile(leading: Icon(Icons.home), title: Text('名称：智慧停车场A区')),
+            ListTile(leading: Icon(Icons.location_on), title: Text('地址：XX路123号')),
+            ListTile(leading: Icon(Icons.format_list_numbered), title: Text('总车位：200')),
+            ListTile(leading: Icon(Icons.local_parking), title: Text('剩余车位：48')),
+            ListTile(leading: Icon(Icons.attach_money), title: Text('停车费：5元/小时')),
+          ],
+        ),
       ),
     );
   }

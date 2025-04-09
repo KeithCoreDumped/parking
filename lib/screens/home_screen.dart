@@ -9,48 +9,46 @@ import 'reservation_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  void navigateWithCheck(BuildContext context, Widget screen) {
+  void _navigateWithCheck(BuildContext context, Widget page) {
     if (!CarPlateProvider.isBound()) {
       showDialog(
         context: context,
-        builder: (_) => CarPlateBindingDialog(nextScreen: screen),
+        builder: (_) => CarPlateBindingDialog(nextScreen: page),
       );
     } else {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+      Navigator.push(context, MaterialPageRoute(builder: (_) => page));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('智能停车管理系统')),
+      appBar: AppBar(title: const Text('🚗 智能停车系统')),
       body: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
-          ListTile(
-            title: const Text('停车场信息展示'),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ParkInfoScreen())),
-          ),
-          ListTile(
-            title: const Text('违章提醒'),
-            onTap: () => navigateWithCheck(context, ViolationScreen()),
-          ),
-          ListTile(
-            title: const Text('车牌寻车'),
-            onTap: () => navigateWithCheck(context, FindCarScreen()),
-          ),
-          ListTile(
-            title: const Text('付款'),
-            onTap: () => navigateWithCheck(context, PaymentScreen()),
-          ),
-          ListTile(
-            title: const Text('预留车位'),
-            onTap: () => navigateWithCheck(context, ReservationScreen()),
-          ),
+          _buildTile(context, Icons.local_parking, '停车场信息', ParkInfoScreen(), requirePlate: false),
+          _buildTile(context, Icons.warning, '违章提醒', ViolationScreen()),
+          _buildTile(context, Icons.search, '车牌寻车', FindCarScreen()),
+          _buildTile(context, Icons.payment, '停车缴费', PaymentScreen()),
+          _buildTile(context, Icons.event_seat, '预留车位', ReservationScreen()),
         ],
       ),
     );
   }
+
+  Widget _buildTile(BuildContext context, IconData icon, String title, Widget screen, {bool requirePlate = true}) {
+    return Card(
+      child: ListTile(
+        leading: Icon(icon, color: Colors.teal),
+        title: Text(title),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: () => requirePlate ? _navigateWithCheck(context, screen) : Navigator.push(context, MaterialPageRoute(builder: (_) => screen)),
+      ),
+    );
+  }
 }
+
 
 class CarPlateBindingDialog extends StatefulWidget {
   final Widget nextScreen;

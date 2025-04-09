@@ -11,10 +11,11 @@ class ParkingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
       title: '智能停车管理系统',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.teal,
+        appBarTheme: const AppBarTheme(centerTitle: true),
+        useMaterial3: true,
       ),
       home: const HomeScreen(),
     );

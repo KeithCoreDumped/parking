@@ -6,13 +6,26 @@ class FindCarScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final plate = CarPlateProvider.carPlate ?? '未知';
-    final location = 'B2层-15号车位';
-
     return Scaffold(
-      appBar: AppBar(title: const Text('车牌寻车')),
+      appBar: AppBar(title: const Text('🚘 寻找车辆')),
       body: Center(
-        child: Text('车牌 $plate 在位置：$location', style: TextStyle(fontSize: 18)),
+        child: Card(
+          elevation: 4,
+          margin: const EdgeInsets.all(20),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.directions_car, size: 60, color: Colors.teal),
+                const SizedBox(height: 20),
+                Text('车牌：${CarPlateProvider.carPlate}', style: TextStyle(fontSize: 18)),
+                const SizedBox(height: 10),
+                const Text('位置：B2层-15号车位', style: TextStyle(fontSize: 16)),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

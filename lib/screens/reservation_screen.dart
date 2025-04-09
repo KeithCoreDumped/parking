@@ -5,24 +5,18 @@ class ReservationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reservationInfo = '预约成功：B1-08号位，今日13:00-14:00';
-
     return Scaffold(
-      appBar: AppBar(title: const Text('预留车位')),
+      appBar: AppBar(title: const Text('📍 车位预约')),
       body: Center(
-        child: ElevatedButton(
-          child: const Text('立即预约'),
+        child: ElevatedButton.icon(
+          icon: Icon(Icons.event_available),
+          label: const Text('立即预约'),
           onPressed: () => showDialog(
             context: context,
             builder: (_) => AlertDialog(
-              title: const Text('预约信息'),
-              content: Text(reservationInfo),
-              actions: [
-                TextButton(
-                  child: const Text('确定'),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
+              title: const Text('✅ 预约成功'),
+              content: const Text('您已预约B1-08号位\n今天 13:00 - 14:00'),
+              actions: [TextButton(child: const Text('好的'), onPressed: () => Navigator.pop(context))],
             ),
           ),
         ),
