@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = 'http://127.0.0.1:5000'; // 或你的局域网服务器IP
+  static const String baseUrl = 'http://10.29.104.37:5000'; // 或你的局域网服务器IP
 
   Future<Map<String, dynamic>> getParkInfo() async {
     final response = await http.get(Uri.parse('$baseUrl/park_info'));
