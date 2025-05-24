@@ -12,155 +12,96 @@ class ReservationScreen extends StatefulWidget {
 class _ReservationScreenState extends State<ReservationScreen> {
   final ApiService api = ApiService();
 
-  DateTime? selectedDate;
-  TimeOfDay? startTime;
-  TimeOfDay? endTime;
+  String statusMessage = '🔄 正在加载状态...';
+  Color statusColor = Colors.grey;
+  bool isLoading = true;
+  bool hasReserved = false;
 
-  String result = '';
-  Color resultColor = Colors.green;
-
-  // 选择日期（带汉化提示）
-  Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 30)),
-      helpText: "请选择日期",
-      cancelText: "取消",
-      confirmText: "确认",
-      errorFormatText: "输入日期格式有误，请重新输入",
-      errorInvalidText: "输入日期不合法，请重新输入",
-      fieldLabelText: "输入所选日期",
-      fieldHintText: "请输入日期",
-    );
-    if (picked != null) {
-      setState(() => selectedDate = picked);
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadReservationStatus();
   }
 
-  // 整点时间选择器
-  Future<TimeOfDay?> _pickRoundedTime() async {
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now().replacing(minute: 0),
-      cancelText: "取消",
-      confirmText: "确认",
-      helpText: "请选择时间",
-      hourLabelText: "小时",
-      minuteLabelText: "分钟",
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
-          child: child ?? Container(),
-        );
-      },
-    );
-    if (picked == null) return null;
-    return TimeOfDay(hour: picked.hour, minute: 0);
-  }
+  Future<void> _loadReservationStatus() async {
+    final plate = CarPlateProvider.carPlate ?? '未绑定';
 
-  Future<void> _selectStartTime() async {
-    final picked = await _pickRoundedTime();
-    if (picked != null) setState(() => startTime = picked);
-  }
+    try {
+      final data = await api.query(plate);
+      String msg = '';
+      Color color = Colors.blue;
 
-  Future<void> _selectEndTime() async {
-    final picked = await _pickRoundedTime();
-    if (picked != null) setState(() => endTime = picked);
-  }
+      if (data['checked_in'] == true) {
+        msg = "🚗 已入库，时间：${data['checkin_time']}";
+        color = Colors.green;
+      } else if (data['reserved'] == true) {
+        msg = "📌 已预约";
+        color = Colors.orange;
+        hasReserved = true;
+      } else {
+        msg = "ℹ️ 无预约记录";
+        color = Colors.grey;
+      }
 
-  void reserve() async {
-    if (selectedDate == null || startTime == null || endTime == null) {
       setState(() {
-        result = '❌ 请选择完整的日期和时间段';
-        resultColor = Colors.red;
+        statusMessage = msg;
+        statusColor = color;
+        isLoading = false;
       });
-      return;
-    }
-
-    final start = Duration(hours: startTime!.hour);
-    final end = Duration(hours: endTime!.hour);
-
-    if (end <= start) {
+    } catch (e) {
       setState(() {
-        result = '❌ 结束时间必须晚于开始时间';
-        resultColor = Colors.red;
+        statusMessage = "❌ 查询失败，请检查网络或服务器：${e.toString()}";
+        statusColor = Colors.red;
+        isLoading = false;
       });
-      return;
     }
+  }
 
-    final formattedDate =
-        "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}";
-    final timeSlot =
-        "${startTime!.format(context)}-${endTime!.format(context)}";
+  void _reserveNow() async {
+    final plate = CarPlateProvider.carPlate ?? '未绑定';
 
-    final res = await api.makeReservation(
-      CarPlateProvider.carPlate ?? '未绑定',
-      formattedDate,
-      timeSlot,
-    );
-
+    final res = await api.makeReservation(plate);
     setState(() {
-      result = "✅ 预约成功：${res['spot']}，${res['date']} ${res['time']}";
-      resultColor = Colors.green;
+      if (res['success']) {
+        statusMessage = "✅ ${res['message']}";
+        statusColor = Colors.green;
+        hasReserved = true;
+      }
+      else {
+        statusMessage = "❌ 预约失败：${res['message']}";
+        statusColor = Colors.red;
+        hasReserved = false;
+      }
     });
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return '选择日期';
-    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-  }
-
-  String _formatTime(TimeOfDay? time) {
-    return time?.format(context) ?? '选择时间';
-  }
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('📅 预约车位')),
-      body: Padding(
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(title: const Text('📍 预约车位')),
+    body: Center(
+      child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: Text(_formatDate(selectedDate)),
-              onTap: _selectDate,
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: ListTile(
-                    leading: const Icon(Icons.access_time),
-                    title: Text('开始：${_formatTime(startTime)}'),
-                    onTap: _selectStartTime,
-                  ),
-                ),
-                Expanded(
-                  child: ListTile(
-                    leading: const Icon(Icons.access_time),
-                    title: Text('结束：${_formatTime(endTime)}'),
-                    onTap: _selectEndTime,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.event_available),
-              label: const Text('立即预约'),
-              onPressed: reserve,
-            ),
-            const SizedBox(height: 20),
             Text(
-              result,
-              style: TextStyle(fontSize: 16, color: resultColor),
+              statusMessage,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: statusColor),
             ),
+            const SizedBox(height: 20),
+            if (!isLoading && !hasReserved)
+              ElevatedButton.icon(
+                icon: const Icon(Icons.event_available),
+                label: const Text('立即预约'),
+                onPressed: _reserveNow,
+              ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
