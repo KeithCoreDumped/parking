@@ -53,7 +53,7 @@ class HomeScreen extends StatelessWidget {
 class CarPlateBindingDialog extends StatefulWidget {
   final Widget nextScreen;
 
-  CarPlateBindingDialog({required this.nextScreen});
+  const CarPlateBindingDialog({super.key, required this.nextScreen});
 
   @override
   _CarPlateBindingDialogState createState() => _CarPlateBindingDialogState();
@@ -73,18 +73,20 @@ class _CarPlateBindingDialogState extends State<CarPlateBindingDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            CarPlateProvider.bindCarPlate(plateController.text);
-            Navigator.pop(context);
-            Navigator.push(context, MaterialPageRoute(builder: (_) => widget.nextScreen));
+            if (plateController.text.isNotEmpty) {
+              CarPlateProvider.bindCarPlate(plateController.text);
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => widget.nextScreen));
+            }
           },
-          child: const Text('绑定'),
+          child: const Text('继续'),
         ),
         TextButton(
           onPressed: () {
             Navigator.pop(context);
-            Navigator.push(context, MaterialPageRoute(builder: (_) => widget.nextScreen));
+            // Navigator.push(context, MaterialPageRoute(builder: (_) => widget.nextScreen));
           },
-          child: const Text('暂不绑定'),
+          child: const Text('返回'),
         ),
       ],
     );
